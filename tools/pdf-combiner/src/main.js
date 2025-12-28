@@ -64,6 +64,9 @@ async function handleDrop(event) {
   await processFiles(files);
 }
 
+// Store original ZIP filename (without extension)
+let originalZipFilename = null;
+
 /**
  * Process uploaded files (PDFs or ZIP)
  */
@@ -74,10 +77,14 @@ async function processFiles(files) {
     processing.classList.add('active');
 
     uploadedPDFs = [];
+    originalZipFilename = null;
 
     for (const file of files) {
       if (file.name.endsWith('.zip')) {
-        // Handle ZIP file
+        // Handle ZIP file - store its name for later
+        if (!originalZipFilename) {
+          originalZipFilename = file.name.replace(/\.zip$/i, '');
+        }
         const pdfFiles = await extractPDFsFromZip(file);
         for (const pdfFile of pdfFiles) {
           await processPDF(pdfFile);
@@ -90,6 +97,12 @@ async function processFiles(files) {
 
     if (uploadedPDFs.length === 0) {
       throw new Error('No PDF files found');
+    }
+
+    // Set ZIP filename input to original ZIP name if available
+    const zipFilenameInput = document.getElementById('zipFilename');
+    if (originalZipFilename) {
+      zipFilenameInput.value = originalZipFilename;
     }
 
     // Generate combined PDFs for all
@@ -349,7 +362,12 @@ async function downloadAllAsZip() {
     }
 
     const zipBlob = await zip.generateAsync({ type: 'blob' });
-    downloadFile(zipBlob, 'combined-pdfs.zip');
+
+    // Get ZIP filename from input, default to 'combined-pdfs'
+    const zipFilenameInput = document.getElementById('zipFilename');
+    const zipFilename = (zipFilenameInput.value.trim() || 'combined-pdfs') + '.zip';
+
+    downloadFile(zipBlob, zipFilename);
   } catch (error) {
     console.error('Error creating ZIP:', error);
     showError('Failed to create ZIP file: ' + error.message);

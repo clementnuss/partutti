@@ -169,28 +169,13 @@
       overflow: visible;
       background: white;
       position: relative;
-      cursor: zoom-in;
     }
 
     .split-thumbnail canvas {
       width: 100%;
       height: auto;
       display: block;
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
-      transition-delay: 0.5s;
       border-radius: 4px;
-    }
-
-    .split-thumbnail:hover canvas {
-      transform: scale(3);
-      transform-origin: center;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      position: relative;
-      z-index: 100;
-    }
-
-    .split-thumbnail canvas:not(:hover) {
-      transition-delay: 0s;
     }
 
     .split-info {

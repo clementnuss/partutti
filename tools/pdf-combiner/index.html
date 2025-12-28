@@ -345,7 +345,7 @@
     <h2>Page Combinations</h2>
 
     <div style="margin-bottom: 1.5rem;">
-      <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+      <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
         <label class="checkbox-label">
           <input type="checkbox" id="globalCropMargins" onchange="window.toggleGlobalCropMargins()">
           Crop margins
@@ -362,6 +362,15 @@
             disabled
           />
           <span>%</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <label for="zipFilename" style="font-size: 0.9rem;">ZIP filename:</label>
+          <input
+            type="text"
+            id="zipFilename"
+            placeholder="combined-pdfs"
+            style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; width: 180px;"
+          />
         </div>
         <button id="downloadAllBtn">Download All PDFs</button>
         <button id="downloadZipBtn">Download as ZIP</button>

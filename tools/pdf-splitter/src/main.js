@@ -414,7 +414,9 @@ window.splitPages = async function(index) {
 
   // Remove the original split and insert new ones
   detectedSplits.splice(index, 1, ...newSplits);
-  generatedPDFs.splice(index, 1);
+
+  // Remove the original PDF and add placeholders for new ones
+  generatedPDFs.splice(index, 1, ...new Array(newSplits.length).fill(null));
 
   // Generate PDFs for each new split
   for (let i = 0; i < newSplits.length; i++) {
