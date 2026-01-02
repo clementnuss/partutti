@@ -1,12 +1,12 @@
-# Music PDF Toolkit
+# PartKit
 
 A browser-based toolkit for processing brass band sheet music PDFs. All processing happens client-side - your PDFs never leave your device!
 
 ## 🚀 Live Demo
 
-**https://clementnuss.github.io/music-pdf-toolkit/**
+**https://partkit.n8r.ch**
 
-Or with custom domain: **https://music.n8r.ch** (if DNS configured)
+(Also available at: https://clementnuss.github.io/music-pdf-toolkit/)
 
 ## 🛠️ Tools
 

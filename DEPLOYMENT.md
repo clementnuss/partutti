@@ -19,12 +19,12 @@ git push origin main
    - Once complete, your site will be live at:
      **https://clementnuss.github.io/music-pdf-toolkit/**
 
-## Custom Domain Setup (music.n8r.ch)
+## Custom Domain Setup (partkit.n8r.ch)
 
 ### Step 1: Configure GitHub Pages
 
 1. Go to repository settings → Pages
-2. Under "Custom domain", enter: `music.n8r.ch`
+2. Under "Custom domain", enter: `partkit.n8r.ch`
 3. Click "Save"
 
 ### Step 2: Configure DNS
@@ -33,7 +33,7 @@ Add a CNAME record in your DNS provider (wherever n8r.ch is hosted):
 
 ```
 Type:  CNAME
-Name:  music
+Name:  partkit
 Value: clementnuss.github.io
 TTL:   3600 (or Auto)
 ```
@@ -43,14 +43,14 @@ TTL:   3600 (or Auto)
 **Cloudflare:**
 ```
 Type:     CNAME
-Name:     music
+Name:     partkit
 Target:   clementnuss.github.io
 Proxy:    DNS only (gray cloud)
 ```
 
 **AWS Route 53:**
 ```
-Record name: music.n8r.ch
+Record name: partkit.n8r.ch
 Record type: CNAME
 Value:       clementnuss.github.io
 ```
@@ -58,7 +58,7 @@ Value:       clementnuss.github.io
 ### Step 3: Wait for DNS propagation
 
 - Usually takes 5-30 minutes
-- Check status: `dig music.n8r.ch` or https://www.whatsmydns.net/
+- Check status: `dig partkit.n8r.ch` or https://www.whatsmydns.net/
 
 ### Step 4: Enable HTTPS
 
@@ -66,7 +66,7 @@ Value:       clementnuss.github.io
 2. Check "Enforce HTTPS" (GitHub auto-provisions SSL certificate)
 3. Wait ~15 minutes for certificate to activate
 
-Your site will now be live at: **https://music.n8r.ch** 🎉
+Your site will now be live at: **https://partkit.n8r.ch** 🎉
 
 ## Troubleshooting
 
