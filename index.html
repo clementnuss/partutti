@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-i18n-title="main.title">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,30 +72,35 @@
 </head>
 <body>
   <header>
-    <h1>PartKit</h1>
-    <p class="subtitle">PDF tools for brass band musicians</p>
+    <h1 data-i18n="main.title">PartKit</h1>
+    <p class="subtitle" data-i18n="main.subtitle">PDF tools for brass band musicians</p>
   </header>
 
   <div class="tools-grid">
     <a href="tools/pdf-splitter/" class="tool-card">
-      <h2>PDF Splitter</h2>
-      <p>Split brass band sheet music PDFs by instrument. Automatically detects instrument names and creates individual parts.</p>
+      <h2 data-i18n="tool.splitter.name">PDF Splitter</h2>
+      <p data-i18n="tool.splitter.desc">Split brass band sheet music PDFs by instrument. Automatically detects instrument names and creates individual parts.</p>
     </a>
 
     <a href="tools/pdf-combiner/" class="tool-card">
-      <h2>PDF Page Combiner</h2>
-      <p>Combine 2 pages into 1 for A5 printing. Process multiple PDFs at once with flexible pairing options.</p>
+      <h2 data-i18n="tool.combiner.name">PDF Page Combiner</h2>
+      <p data-i18n="tool.combiner.desc">Combine 2 pages into 1 for A5 printing. Process multiple PDFs at once with flexible pairing options.</p>
     </a>
 
     <a href="tools/pdf-merger/" class="tool-card">
-      <h2>PDF Merger</h2>
-      <p>Merge one common PDF (e.g., lyrics) with all instrument parts. Adds the common pages to the beginning of each part.</p>
+      <h2 data-i18n="tool.merger.name">PDF Merger</h2>
+      <p data-i18n="tool.merger.desc">Merge one common PDF (e.g., lyrics) with all instrument parts. Adds the common pages to the beginning of each part.</p>
     </a>
 
     <a href="tools/pdf-assembler/" class="tool-card">
-      <h2>PDF Assembler</h2>
-      <p>Combine all parts into one master PDF with configurable replicas. Set how many copies of each part you need (e.g., 2 euphoniums).</p>
+      <h2 data-i18n="tool.assembler.name">PDF Assembler</h2>
+      <p data-i18n="tool.assembler.desc">Combine all parts into one master PDF with configurable replicas. Set how many copies of each part you need (e.g., 2 euphoniums).</p>
     </a>
   </div>
+
+  <script type="module">
+    import { initI18n } from './i18n.js';
+    initI18n();
+  </script>
 </body>
 </html>
