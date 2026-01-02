@@ -9,6 +9,7 @@ import { combinePDFPages, calculatePairings } from './pdf-combiner.js';
 let uploadedPDFs = []; // {name, pdfDoc, file, firstPageAlone, pairings, combinedPDF}
 let globalCropMargins = false;
 let globalCropPercent = 5;
+let thumbnailCache = {}; // Cache thumbnails by "pdfIndex-pageNumber" key
 
 // DOM elements
 const uploadArea = document.getElementById('uploadArea');
@@ -78,6 +79,7 @@ async function processFiles(files) {
 
     uploadedPDFs = [];
     originalZipFilename = null;
+    thumbnailCache = {}; // Clear thumbnail cache for new files
 
     for (const file of files) {
       if (file.name.endsWith('.zip')) {
@@ -228,8 +230,29 @@ async function renderPairings(pdf, pdfIndex) {
     // Generate thumbnails
     const thumbnailsDiv = document.getElementById(`thumbnails-${pdfIndex}-${i}`);
     for (const pageNum of pairing) {
-      const page = await pdf.pdfDoc.getPage(pageNum);
-      const canvas = await getPageThumbnail(page, 150);
+      const cacheKey = `${pdfIndex}-${pageNum}`;
+      let canvas;
+
+      // Check if thumbnail is already cached
+      if (thumbnailCache[cacheKey]) {
+        // Reuse cached canvas by copying the image data
+        const cached = thumbnailCache[cacheKey];
+        canvas = document.createElement('canvas');
+        canvas.width = cached.width;
+        canvas.height = cached.height;
+        canvas.style.width = '150px';
+        canvas.style.height = 'auto';
+
+        const context = canvas.getContext('2d');
+        context.drawImage(cached, 0, 0);
+      } else {
+        // Generate new thumbnail
+        const page = await pdf.pdfDoc.getPage(pageNum);
+        canvas = await getPageThumbnail(page, 150);
+
+        // Cache the canvas
+        thumbnailCache[cacheKey] = canvas;
+      }
 
       const container = document.createElement('div');
       container.className = 'thumbnail-container';

@@ -10,6 +10,7 @@ let currentPDF = null;
 let currentFile = null;
 let detectedSplits = [];
 let generatedPDFs = [];
+let thumbnailCache = {}; // Cache thumbnails by page number
 
 // DOM elements
 const uploadArea = document.getElementById('uploadArea');
@@ -82,6 +83,7 @@ async function processPDF(file) {
     hideError();
     previewSection.classList.remove('active');
     processing.classList.add('active');
+    thumbnailCache = {}; // Clear thumbnail cache for new PDF
 
     currentFile = file;
 
@@ -197,6 +199,13 @@ function displayPreview() {
         >
           ✂ Split Pages
         </button>
+        <button
+          class="btn-small btn-delete"
+          onclick="window.deleteSplit(${index})"
+          title="Delete this split"
+        >
+          🗑 Delete
+        </button>
       </div>
     `;
 
@@ -218,7 +227,33 @@ function displayPreview() {
  */
 async function generateThumbnail(split, index) {
   try {
-    const page = await currentPDF.getPage(split.startPage);
+    const pageNumber = split.startPage;
+    const thumbnailDiv = document.getElementById(`thumbnail-${index}`);
+    if (!thumbnailDiv) return;
+
+    // Check if thumbnail is already cached
+    if (thumbnailCache[pageNumber]) {
+      // Reuse cached canvas by copying the image data
+      const cached = thumbnailCache[pageNumber];
+      const canvas = document.createElement('canvas');
+      canvas.width = cached.width;
+      canvas.height = cached.height;
+      canvas.style.width = '100%';
+      canvas.style.height = 'auto';
+
+      const context = canvas.getContext('2d');
+      context.drawImage(cached, 0, 0);
+
+      thumbnailDiv.innerHTML = '';
+      thumbnailDiv.appendChild(canvas);
+
+      // Re-add zoom event listener
+      addZoomListener(thumbnailDiv, canvas);
+      return;
+    }
+
+    // Generate new thumbnail
+    const page = await currentPDF.getPage(pageNumber);
     const viewport = page.getViewport({ scale: 1.0 });
 
     // Calculate scale to fit width - use larger size for better quality
@@ -242,42 +277,15 @@ async function generateThumbnail(split, index) {
       viewport: scaledViewport
     }).promise;
 
+    // Cache the canvas
+    thumbnailCache[pageNumber] = canvas;
+
     // Replace loading text with canvas
-    const thumbnailDiv = document.getElementById(`thumbnail-${index}`);
-    if (thumbnailDiv) {
-      thumbnailDiv.innerHTML = '';
-      thumbnailDiv.appendChild(canvas);
+    thumbnailDiv.innerHTML = '';
+    thumbnailDiv.appendChild(canvas);
 
-      // Add smart zoom origin adjustment
-      thumbnailDiv.addEventListener('mouseenter', function() {
-        const rect = canvas.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const scaledWidth = rect.width * 3;
-        const scaledHeight = rect.height * 3;
-        const leftEdge = rect.left - (scaledWidth - rect.width) / 2;
-        const rightEdge = rect.right + (scaledWidth - rect.width) / 2;
-        const topEdge = rect.top - (scaledHeight - rect.height) / 2;
-        const bottomEdge = rect.bottom + (scaledHeight - rect.height) / 2;
-
-        let xOrigin = 'center';
-        let yOrigin = 'center';
-
-        if (leftEdge < 0) {
-          xOrigin = 'left';
-        } else if (rightEdge > viewportWidth) {
-          xOrigin = 'right';
-        }
-
-        if (topEdge < 0) {
-          yOrigin = 'top';
-        } else if (bottomEdge > viewportHeight) {
-          yOrigin = 'bottom';
-        }
-
-        canvas.style.transformOrigin = `${xOrigin} ${yOrigin}`;
-      });
-    }
+    // Add smart zoom origin adjustment
+    addZoomListener(thumbnailDiv, canvas);
   } catch (error) {
     console.error('Error generating thumbnail:', error);
     const thumbnailDiv = document.getElementById(`thumbnail-${index}`);
@@ -285,6 +293,40 @@ async function generateThumbnail(split, index) {
       thumbnailDiv.innerHTML = '<div style="padding: 4rem 2rem; text-align: center; color: #999;">Error</div>';
     }
   }
+}
+
+/**
+ * Add zoom listener to thumbnail
+ */
+function addZoomListener(thumbnailDiv, canvas) {
+  thumbnailDiv.addEventListener('mouseenter', function() {
+    const rect = canvas.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const scaledWidth = rect.width * 3;
+    const scaledHeight = rect.height * 3;
+    const leftEdge = rect.left - (scaledWidth - rect.width) / 2;
+    const rightEdge = rect.right + (scaledWidth - rect.width) / 2;
+    const topEdge = rect.top - (scaledHeight - rect.height) / 2;
+    const bottomEdge = rect.bottom + (scaledHeight - rect.height) / 2;
+
+    let xOrigin = 'center';
+    let yOrigin = 'center';
+
+    if (leftEdge < 0) {
+      xOrigin = 'left';
+    } else if (rightEdge > viewportWidth) {
+      xOrigin = 'right';
+    }
+
+    if (topEdge < 0) {
+      yOrigin = 'top';
+    } else if (bottomEdge > viewportHeight) {
+      yOrigin = 'bottom';
+    }
+
+    canvas.style.transformOrigin = `${xOrigin} ${yOrigin}`;
+  });
 }
 
 /**
@@ -436,6 +478,18 @@ window.splitPages = async function(index) {
   for (let i = 0; i < newSplits.length; i++) {
     await regeneratePDFForSplit(index + i);
   }
+
+  // Refresh display
+  displayPreview();
+};
+
+/**
+ * Delete a split
+ */
+window.deleteSplit = function(index) {
+  // Remove the split and its PDF
+  detectedSplits.splice(index, 1);
+  generatedPDFs.splice(index, 1);
 
   // Refresh display
   displayPreview();
