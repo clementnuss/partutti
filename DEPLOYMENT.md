@@ -10,14 +10,14 @@ git push origin main
 ```
 
 2. **Enable GitHub Pages**
-   - Go to: https://github.com/clementnuss/music-pdf-toolkit/settings/pages
+   - Go to: https://github.com/clementnuss/partkit/settings/pages
    - Under "Source", select: **GitHub Actions**
    - The workflow will run automatically on push
 
 3. **Wait for deployment** (~1-2 minutes)
-   - Check workflow status: https://github.com/clementnuss/music-pdf-toolkit/actions
+   - Check workflow status: https://github.com/clementnuss/partkit/actions
    - Once complete, your site will be live at:
-     **https://clementnuss.github.io/music-pdf-toolkit/**
+     **https://clementnuss.github.io/partkit/**
 
 ## Custom Domain Setup (partkit.n8r.ch)
 
@@ -71,7 +71,7 @@ Your site will now be live at: **https://partkit.n8r.ch** 🎉
 ## Troubleshooting
 
 ### Build fails
-- Check workflow logs: https://github.com/clementnuss/music-pdf-toolkit/actions
+- Check workflow logs: https://github.com/clementnuss/partkit/actions
 - Ensure `package.json` and `vite.config.js` are committed
 - Try building locally: `npm run build`
 
@@ -82,7 +82,7 @@ Your site will now be live at: **https://partkit.n8r.ch** 🎉
 
 ### Custom domain not working
 - Verify CNAME record: `dig music.n8r.ch`
-- Ensure CNAME points to `clementnuss.github.io` (NOT `clementnuss.github.io/music-pdf-toolkit`)
+- Ensure CNAME points to `clementnuss.github.io` (NOT `clementnuss.github.io/partkit`)
 - Wait longer for DNS propagation (can take up to 48h in rare cases)
 
 ### HTTPS certificate pending

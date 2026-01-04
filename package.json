@@ -1,5 +1,5 @@
 {
-  "name": "music-pdf-toolkit",
+  "name": "partkit",
   "version": "0.1.0",
   "description": "Browser-based toolkit for splitting brass band sheet music PDFs by instrument",
   "type": "module",

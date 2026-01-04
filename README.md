@@ -6,7 +6,7 @@ A browser-based toolkit for processing brass band sheet music PDFs. All processi
 
 **https://partkit.n8r.ch**
 
-(Also available at: https://clementnuss.github.io/music-pdf-toolkit/)
+(Also available at: https://clementnuss.github.io/partkit/)
 
 ## 🛠️ Tools
 
