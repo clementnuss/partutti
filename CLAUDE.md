@@ -1,8 +1,10 @@
-# Music PDF Toolkit - Development Notes
+# Partutti - Development Notes
 
 ## Project Overview
 
 A browser-based toolkit for splitting brass band sheet music PDFs by instrument. Built collaboratively with Claude (Sonnet 4.5) in December 2024.
+
+The name "Partutti" is a play on the Italian musical term "tutti" (meaning "all together") and "part" (as in musical parts), perfectly encapsulating the project's purpose: managing all the parts.
 
 ## Version 0.1 - Initial Release
 

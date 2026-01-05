@@ -5,7 +5,7 @@
 const translations = {
   en: {
     // Main page
-    'main.title': 'PartKit',
+    'main.title': 'Partutti',
     'main.subtitle': 'PDF tools for brass band musicians',
 
     // Tools
@@ -84,7 +84,7 @@ const translations = {
 
   de: {
     // Main page
-    'main.title': 'PartKit',
+    'main.title': 'Partutti',
     'main.subtitle': 'PDF-Werkzeuge für Brass-Band-Musiker',
 
     // Tools
@@ -163,7 +163,7 @@ const translations = {
 
   fr: {
     // Main page
-    'main.title': 'PartKit',
+    'main.title': 'Partutti',
     'main.subtitle': 'Outils PDF pour musiciens de brass band',
 
     // Tools

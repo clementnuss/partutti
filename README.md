@@ -1,12 +1,12 @@
-# PartKit
+# Partutti
 
 A browser-based toolkit for processing brass band sheet music PDFs. All processing happens client-side - your PDFs never leave your device!
 
 ## 🚀 Live Demo
 
-**https://partkit.n8r.ch**
+**https://partutti.n8r.ch**
 
-(Also available at: https://clementnuss.github.io/partkit/)
+(Also available at: https://clementnuss.github.io/partutti/)
 
 ## 🛠️ Tools
 
