@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Booklet → A4 - Partutti</title>
+  <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      padding: 2rem;
+      max-width: 1800px;
+      margin: 0 auto;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: #666;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .back-button:hover { background: #555; }
+
+    h1 { color: #333; margin-bottom: 0.5rem; }
+    .subtitle { color: #666; font-size: 0.9rem; }
+
+    .meta-fields {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .meta-fields label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.85rem;
+      color: #555;
+    }
+    .meta-fields input[type="text"] {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      width: 240px;
+    }
+
+    .upload-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .upload-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 3rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-area:hover { border-color: #4CAF50; background: #f9f9f9; }
+    .upload-area.dragover { border-color: #4CAF50; background: #e8f5e9; }
+    input[type="file"] { display: none; }
+    .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    .file-info {
+      background: #f5f5f5;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-top: 1rem;
+      display: none;
+    }
+    .file-info strong { color: #4CAF50; }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+    button:hover { background: #45a049; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+
+    .processing {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      display: none;
+    }
+    .processing.active { display: block; }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .editor-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .editor-section.active { display: block; }
+
+    .editor-toolbar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .editor-toolbar h2 { margin-right: auto; }
+
+    .btn-small {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.9rem;
+    }
+    .btn-small.active { background: #FF9800; }
+    .btn-small.active:hover { background: #F57C00; }
+
+    .halves-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .half-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.75rem;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .half-card.blank .half-thumb { opacity: 0.45; }
+
+    .half-num {
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #4CAF50;
+    }
+
+    .half-thumb-wrap {
+      position: relative;
+    }
+    .half-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1.414; /* A4 portrait */
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      --rot: 0deg;
+    }
+    .half-thumb canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      object-fit: cover;
+      transform: rotate(var(--rot));
+      transform-origin: center center;
+    }
+    .half-thumb.right canvas { left: -100%; }
+
+    .blank-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 152, 0, 0.9);
+      color: white;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .half-meta {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .half-controls {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+    .half-controls .btn-small {
+      flex: 1;
+      min-width: 2.5rem;
+      padding: 0.35rem 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error.active { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="../../index.html" class="back-button" data-i18n="common.back">← Back to Home</a>
+    <h1 data-i18n="tool.booklet.name">PDF Booklet → A4</h1>
+    <p class="subtitle" data-i18n="tool.booklet.desc">Split scanned A3 booklets into A4 pages and reorder them into reading order.</p>
+
+    <div class="meta-fields">
+      <label>
+        <span data-i18n="booklet.piece.label">Piece name</span>
+        <input type="text" id="pieceName" placeholder="e.g., Apocalyptica" data-i18n="booklet.piece.placeholder">
+      </label>
+      <label>
+        <span data-i18n="booklet.instrument.label">Instrument</span>
+        <input type="text" id="instrumentName" placeholder="e.g., Cornet 1" data-i18n="booklet.instrument.placeholder">
+      </label>
+    </div>
+  </header>
+
+  <div class="upload-section">
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📐</div>
+      <p><strong data-i18n="booklet.upload.title">Drop one A3 booklet PDF here</strong> <span data-i18n="booklet.upload.browse">or click to browse</span></p>
+      <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;" data-i18n="booklet.upload.subtitle">
+        One instrument per file. A3 landscape, duplex scan.
+      </p>
+      <input type="file" id="fileInput" accept=".pdf">
+    </div>
+    <div id="fileInfo" class="file-info"></div>
+  </div>
+
+  <div class="error" id="errorMessage"></div>
+
+  <div class="processing" id="processing">
+    <div class="spinner"></div>
+    <p id="processingLabel" data-i18n="common.processing">Processing PDF...</p>
+  </div>
+
+  <div class="editor-section" id="editorSection">
+    <div class="editor-toolbar">
+      <h2 data-i18n="booklet.editor.title">Pages (reading order)</h2>
+      <button id="autoOrderBtn" data-i18n="booklet.autoOrder">Auto-reorder (saddle-stitch)</button>
+      <button id="downloadBtn" data-i18n="booklet.download">Download A4 PDF</button>
+    </div>
+    <div class="halves-list" id="halvesList"></div>
+  </div>
+
+  <script type="module">
+    import { initI18n } from '../../i18n.js';
+    initI18n();
+  </script>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

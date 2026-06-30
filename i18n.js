@@ -18,6 +18,9 @@ const translations = {
     'tool.assembler.name': 'PDF Assembler',
     'tool.assembler.desc': 'Combine all parts into one master PDF with configurable replicas.',
 
+    'tool.booklet.name': 'PDF Booklet → A4',
+    'tool.booklet.desc': 'Split scanned A3 booklets into A4 pages and reorder them into reading order.',
+
     // Common
     'common.back': 'Back to Home',
     'common.download': 'Download',
@@ -77,6 +80,29 @@ const translations = {
     'assembler.page': 'page',
     'assembler.pages': 'pages',
 
+    // Booklet
+    'booklet.upload.title': 'Drop one A3 booklet PDF here',
+    'booklet.upload.subtitle': 'One instrument per file. A3 landscape, duplex scan.',
+    'booklet.upload.browse': 'or click to browse',
+    'booklet.piece.label': 'Piece name',
+    'booklet.piece.placeholder': 'e.g., Apocalyptica',
+    'booklet.instrument.label': 'Instrument',
+    'booklet.instrument.placeholder': 'e.g., Cornet 1',
+    'booklet.processing': 'Processing PDF...',
+    'booklet.exporting': 'Exporting A4 PDF...',
+    'booklet.editor.title': 'Pages (reading order)',
+    'booklet.autoOrder': 'Auto-reorder (saddle-stitch)',
+    'booklet.download': 'Download A4 PDF',
+    'booklet.blank': 'blank',
+    'booklet.markBlank': 'Mark blank',
+    'booklet.unmarkBlank': 'Mark filled',
+    'booklet.move.up': 'Move up',
+    'booklet.move.down': 'Move down',
+    'booklet.rotate': 'Rotate 90°',
+    'booklet.sheet': 'Sheet',
+    'booklet.error.load': 'Failed to load PDF',
+    'booklet.error.export': 'Failed to export PDF',
+
     // Footer
     'footer.star': 'Star on GitHub',
     'footer.bug': 'Report Bug / Request Feature',
@@ -96,6 +122,9 @@ const translations = {
     'tool.merger.desc': 'Fügt eine gemeinsame PDF (z.B. Liedtexte) mit allen Instrumentenstimmen zusammen.',
     'tool.assembler.name': 'PDF-Assembler',
     'tool.assembler.desc': 'Kombiniert alle Stimmen in eine Master-PDF mit konfigurierbaren Kopien.',
+
+    'tool.booklet.name': 'PDF-Heft → A4',
+    'tool.booklet.desc': 'Zerlegt gescannte A3-Hefte in A4-Seiten und sortiert sie in die Lesereihenfolge.',
 
     // Common
     'common.back': 'Zurück zur Startseite',
@@ -156,6 +185,29 @@ const translations = {
     'assembler.page': 'Seite',
     'assembler.pages': 'Seiten',
 
+    // Booklet
+    'booklet.upload.title': 'Ein A3-Heft-PDF hier ablegen',
+    'booklet.upload.subtitle': 'Ein Instrument pro Datei. A3 Querformat, Duplex-Scan.',
+    'booklet.upload.browse': 'oder klicken zum Durchsuchen',
+    'booklet.piece.label': 'Stückname',
+    'booklet.piece.placeholder': 'z.B., Apocalyptica',
+    'booklet.instrument.label': 'Instrument',
+    'booklet.instrument.placeholder': 'z.B., Cornet 1',
+    'booklet.processing': 'PDF wird verarbeitet...',
+    'booklet.exporting': 'A4-PDF wird exportiert...',
+    'booklet.editor.title': 'Seiten (Lesereihenfolge)',
+    'booklet.autoOrder': 'Auto-Sortierung (Heftbindung)',
+    'booklet.download': 'A4-PDF herunterladen',
+    'booklet.blank': 'leer',
+    'booklet.markBlank': 'Als leer markieren',
+    'booklet.unmarkBlank': 'Als gefüllt markieren',
+    'booklet.move.up': 'Nach oben',
+    'booklet.move.down': 'Nach unten',
+    'booklet.rotate': '90° drehen',
+    'booklet.sheet': 'Blatt',
+    'booklet.error.load': 'PDF konnte nicht geladen werden',
+    'booklet.error.export': 'PDF konnte nicht exportiert werden',
+
     // Footer
     'footer.star': 'Mit Stern auf GitHub markieren',
     'footer.bug': 'Fehler melden / Funktion anfordern',
@@ -175,6 +227,9 @@ const translations = {
     'tool.merger.desc': 'Fusionne un PDF commun (par ex. paroles) avec toutes les parties instrumentales.',
     'tool.assembler.name': 'Assembleur PDF',
     'tool.assembler.desc': 'Combine toutes les parties en un seul PDF avec un nombre de copies par instrument configurable.',
+
+    'tool.booklet.name': 'PDF Livret → A4',
+    'tool.booklet.desc': 'Découpe les livrets A3 scannés en pages A4 et les remet dans l\'ordre de lecture.',
 
     // Common
     'common.back': 'Retour à l\'accueil',
@@ -234,6 +289,29 @@ const translations = {
     'assembler.total': 'Total :',
     'assembler.page': 'page',
     'assembler.pages': 'pages',
+
+    // Booklet
+    'booklet.upload.title': 'Déposez un PDF livret A3 ici',
+    'booklet.upload.subtitle': 'Un instrument par fichier. A3 paysage, scan recto-verso.',
+    'booklet.upload.browse': 'ou cliquez pour parcourir',
+    'booklet.piece.label': 'Nom du morceau',
+    'booklet.piece.placeholder': 'par ex., Apocalyptica',
+    'booklet.instrument.label': 'Instrument',
+    'booklet.instrument.placeholder': 'par ex., Cornet 1',
+    'booklet.processing': 'Traitement du PDF...',
+    'booklet.exporting': 'Export du PDF A4...',
+    'booklet.editor.title': 'Pages (ordre de lecture)',
+    'booklet.autoOrder': 'Réordonnancer (livret agrafé)',
+    'booklet.download': 'Télécharger le PDF A4',
+    'booklet.blank': 'vide',
+    'booklet.markBlank': 'Marquer vide',
+    'booklet.unmarkBlank': 'Marquer rempli',
+    'booklet.move.up': 'Monter',
+    'booklet.move.down': 'Descendre',
+    'booklet.rotate': 'Pivoter 90°',
+    'booklet.sheet': 'Feuille',
+    'booklet.error.load': 'Échec du chargement du PDF',
+    'booklet.error.export': 'Échec de l\'export du PDF',
 
     // Footer
     'footer.star': 'Ajouter une étoile sur GitHub',

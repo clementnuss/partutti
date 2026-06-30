@@ -16,6 +16,7 @@ export default defineConfig({
         combiner: resolve(__dirname, 'tools/pdf-combiner/index.html'),
         merger: resolve(__dirname, 'tools/pdf-merger/index.html'),
         assembler: resolve(__dirname, 'tools/pdf-assembler/index.html'),
+        booklet: resolve(__dirname, 'tools/pdf-booklet/index.html'),
       }
     }
   }
