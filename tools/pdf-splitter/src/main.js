@@ -3,8 +3,9 @@
  */
 
 import { loadPDF } from './pdf-processor.js';
-import { analyzePDF, generateSplitPDFs } from './pdf-splitter.js';
+import { analyzePDF, generateSplitPDFs, pruneUnusedResources } from './pdf-splitter.js';
 import { t } from '../../../i18n.js';
+import { PDFDocument } from 'pdf-lib';
 
 // State
 let currentPDF = null;
@@ -88,6 +89,9 @@ async function processPDF(file) {
     thumbnailCache = {}; // Clear thumbnail cache for new PDF
 
     currentFile = file;
+
+    // Invalidate cached source PDF (new file loaded)
+    cachedSourcePdf = null;
 
     // Load PDF
     currentPDF = await loadPDF(file);
@@ -361,14 +365,24 @@ async function handleFilenameChange() {
 }
 
 /**
- * Regenerate a single split PDF with updated instrument name
+ * Regenerate a single split PDF with updated instrument name.
+ * Caches the loaded source PDF so we don't re-read the file from disk on
+ * every call (merge/split/rename operations call this repeatedly).
  */
+let cachedSourcePdf = null;
+
+async function getSourcePdf() {
+  if (!cachedSourcePdf && currentFile) {
+    const arrayBuffer = await currentFile.arrayBuffer();
+    cachedSourcePdf = await PDFDocument.load(arrayBuffer);
+  }
+  return cachedSourcePdf;
+}
+
 async function regeneratePDFForSplit(index) {
   try {
     const split = detectedSplits[index];
-    const arrayBuffer = await currentFile.arrayBuffer();
-    const { PDFDocument } = await import('pdf-lib');
-    const pdfDoc = await PDFDocument.load(arrayBuffer);
+    const pdfDoc = await getSourcePdf();
 
     const newPdf = await PDFDocument.create();
     const copiedPages = await newPdf.copyPages(
@@ -377,6 +391,9 @@ async function regeneratePDFForSplit(index) {
     );
 
     copiedPages.forEach(page => newPdf.addPage(page));
+
+    // Prune unused XObjects and orphaned objects to minimize split size
+    await pruneUnusedResources(newPdf);
 
     const pdfBytes = await newPdf.save();
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
