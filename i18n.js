@@ -102,6 +102,7 @@ const translations = {
     'booklet.sheet': 'Sheet',
     'booklet.error.load': 'Failed to load PDF',
     'booklet.error.export': 'Failed to export PDF',
+    'booklet.reuseFilename': 'Reuse original filename',
 
     // Footer
     'footer.star': 'Star on GitHub',
@@ -207,6 +208,7 @@ const translations = {
     'booklet.sheet': 'Blatt',
     'booklet.error.load': 'PDF konnte nicht geladen werden',
     'booklet.error.export': 'PDF konnte nicht exportiert werden',
+    'booklet.reuseFilename': 'Originalen Dateinamen verwenden',
 
     // Footer
     'footer.star': 'Mit Stern auf GitHub markieren',
@@ -312,6 +314,7 @@ const translations = {
     'booklet.sheet': 'Feuille',
     'booklet.error.load': 'Échec du chargement du PDF',
     'booklet.error.export': 'Échec de l\'export du PDF',
+    'booklet.reuseFilename': 'Réutiliser le nom de fichier d\'origine',
 
     // Footer
     'footer.star': 'Ajouter une étoile sur GitHub',

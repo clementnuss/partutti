@@ -62,6 +62,30 @@
       font-size: 1rem;
       width: 240px;
     }
+    .meta-fields label.reuse-filename-label {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.5rem;
+      align-self: flex-end;
+      padding-bottom: 0.5rem;
+    }
+    .reuse-filename-label input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      cursor: pointer;
+      margin: 0;
+    }
+    .reuse-filename-label span {
+      cursor: pointer;
+    }
+    /* When the "reuse original filename" box is ticked, dim the piece/instrument
+       inputs since they no longer affect the output filename. */
+    .meta-fields.disabled-text-inputs input[type="text"] {
+      background: #eee;
+      color: #999;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
 
     .upload-section {
       background: white;
@@ -247,7 +271,7 @@
     <h1 data-i18n="tool.booklet.name">PDF Booklet → A4</h1>
     <p class="subtitle" data-i18n="tool.booklet.desc">Split scanned A3 booklets into A4 pages and reorder them into reading order.</p>
 
-    <div class="meta-fields">
+    <div class="meta-fields" id="metaFields">
       <label>
         <span data-i18n="booklet.piece.label">Piece name</span>
         <input type="text" id="pieceName" placeholder="e.g., Apocalyptica" data-i18n="booklet.piece.placeholder">
@@ -255,6 +279,10 @@
       <label>
         <span data-i18n="booklet.instrument.label">Instrument</span>
         <input type="text" id="instrumentName" placeholder="e.g., Cornet 1" data-i18n="booklet.instrument.placeholder">
+      </label>
+      <label class="reuse-filename-label">
+        <input type="checkbox" id="reuseFilename">
+        <span data-i18n="booklet.reuseFilename">Reuse original filename</span>
       </label>
     </div>
   </header>

@@ -34,6 +34,8 @@ let thumbByKey = {};        // canvas per "pageIndex-half" (stable across reorde
 // ---- DOM -----------------------------------------------------------------
 const pieceInput = document.getElementById('pieceName');
 const instrumentInput = document.getElementById('instrumentName');
+const reuseFilenameCheckbox = document.getElementById('reuseFilename');
+const metaFields = document.getElementById('metaFields');
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
 const processing = document.getElementById('processing');
@@ -50,6 +52,15 @@ pieceInput.value = localStorage.getItem(LS_PIECE) || '';
 instrumentInput.value = localStorage.getItem(LS_INSTRUMENT) || '';
 pieceInput.addEventListener('input', () => localStorage.setItem(LS_PIECE, pieceInput.value));
 instrumentInput.addEventListener('input', () => localStorage.setItem(LS_INSTRUMENT, instrumentInput.value));
+
+// "Reuse original filename" — when ticked, the piece/instrument inputs are
+// irrelevant (the output name comes from the source file), so visually dim
+// and disable them.
+function syncReuseFilenameState() {
+  metaFields.classList.toggle('disabled-text-inputs', reuseFilenameCheckbox.checked);
+}
+reuseFilenameCheckbox.addEventListener('change', syncReuseFilenameState);
+syncReuseFilenameState();
 
 // Events
 uploadArea.addEventListener('click', () => fileInput.click());
@@ -282,11 +293,20 @@ function toggleBlankHalf(i) {
 async function downloadPDF() {
   try {
     hideError();
-    const piece = pieceInput.value.trim() || 'piece';
-    const instrument = instrumentInput.value.trim() || 'instrument';
-    const filename = `${piece}-${instrument}.pdf`
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-.]/g, '');
+    let filename;
+    if (reuseFilenameCheckbox.checked && sourceFile) {
+      // Preserve the original filename; only swap the extension to .pdf
+      // (and strip any path separators, which shouldn't appear in a File
+      // name but guards against malicious drag/drop values).
+      const base = sourceFile.name.replace(/\.[^./]+$/, '');
+      filename = `${base}.pdf`.replace(/[\\/:]/g, '-');
+    } else {
+      const piece = pieceInput.value.trim() || 'piece';
+      const instrument = instrumentInput.value.trim() || 'instrument';
+      filename = `${piece}-${instrument}.pdf`
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-.]/g, '');
+    }
 
     processing.classList.add('active');
     processingLabel.textContent = t('booklet.exporting');
