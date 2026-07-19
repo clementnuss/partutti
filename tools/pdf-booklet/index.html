@@ -169,6 +169,22 @@
     }
     .editor-toolbar h2 { margin-right: auto; }
 
+    .saddle-stitch-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      color: #555;
+      cursor: pointer;
+      user-select: none;
+    }
+    .saddle-stitch-toggle input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      cursor: pointer;
+      margin: 0;
+    }
+
     .btn-small {
       padding: 0.4rem 0.75rem;
       font-size: 0.9rem;
@@ -309,7 +325,10 @@
   <div class="editor-section" id="editorSection">
     <div class="editor-toolbar">
       <h2 data-i18n="booklet.editor.title">Pages (reading order)</h2>
-      <button id="autoOrderBtn" data-i18n="booklet.autoOrder">Auto-reorder (saddle-stitch)</button>
+      <label class="saddle-stitch-toggle">
+        <input type="checkbox" id="saddleStitchCheckbox" checked>
+        <span data-i18n="booklet.saddleStitch">Saddle-stitch order</span>
+      </label>
       <button id="downloadBtn" data-i18n="booklet.download">Download A4 PDF</button>
     </div>
     <div class="halves-list" id="halvesList"></div>

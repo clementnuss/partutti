@@ -42,7 +42,7 @@ const processing = document.getElementById('processing');
 const processingLabel = document.getElementById('processingLabel');
 const editorSection = document.getElementById('editorSection');
 const halvesList = document.getElementById('halvesList');
-const autoOrderBtn = document.getElementById('autoOrderBtn');
+const saddleStitchCheckbox = document.getElementById('saddleStitchCheckbox');
 const downloadBtn = document.getElementById('downloadBtn');
 const errorMessage = document.getElementById('errorMessage');
 const fileInfo = document.getElementById('fileInfo');
@@ -68,7 +68,10 @@ uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.
 uploadArea.addEventListener('dragleave', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
 uploadArea.addEventListener('drop', handleDrop);
 fileInput.addEventListener('change', handleFileSelect);
-autoOrderBtn.addEventListener('click', applySaddleStitchOrder);
+saddleStitchCheckbox.addEventListener('change', () => {
+  if (saddleStitchCheckbox.checked) applySaddleStitchOrder();
+  else applyScanOrder();
+});
 downloadBtn.addEventListener('click', downloadPDF);
 
 let nextId = 1;
@@ -100,7 +103,10 @@ async function loadFile(file) {
 
     await renderAllThumbnails();
     await buildHalves();
-    applySaddleStitchOrder();
+    // Respect the current toggle: saddle-stitch if checked, plain scan order
+    // (page-left, page-right, ...) otherwise.
+    if (saddleStitchCheckbox.checked) applySaddleStitchOrder();
+    else applyScanOrder();
 
     processing.classList.remove('active');
     editorSection.classList.add('active');
@@ -193,6 +199,29 @@ function applySaddleStitchOrder() {
 
   // Reassign ids for fresh DOM state, keep everything else.
   halves = ordered.filter(Boolean).map((spec) => ({ ...spec, id: nextId++ }));
+  renderEditor();
+}
+
+/**
+ * Revert to plain scan order: page0-left, page0-right, page1-left, page1-right,
+ * ... This is the "just split the A3 pages, don't impose" mode — the halves
+ * come out in the same order they appear in the source PDF. Blank/rotation
+ * state is preserved by rebuilding from the current specs.
+ */
+function applyScanOrder() {
+  // Collect current specs and index by [pageIndex][half] so we keep any user
+  // edits (rotation, blank toggles) while reordering into scan order.
+  const byKey = {};
+  for (const spec of halves) byKey[`${spec.pageIndex}-${spec.half}`] = spec;
+
+  const ordered = [];
+  for (let p = 0; p < pdfjsDoc.numPages; p++) {
+    for (const half of ['left', 'right']) {
+      const spec = byKey[`${p}-${half}`];
+      if (spec) ordered.push({ ...spec, id: nextId++ });
+    }
+  }
+  halves = ordered;
   renderEditor();
 }
 
