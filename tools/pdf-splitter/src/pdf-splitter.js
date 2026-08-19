@@ -197,6 +197,17 @@ export async function pruneUnusedResources(pdfDoc) {
   const context = pdfDoc.context;
   const pages = pdfDoc.getPages();
 
+  // Resolve a value that may be an indirect PDFRef into the PDFDict it points
+  // to. XObject (and nested Resources) dictionaries are commonly stored as
+  // indirect references in notation-software exports, so res.get(...) returns
+  // a PDFRef whose .entries is undefined — we must dereference before iterating.
+  const asDict = (obj) => {
+    if (obj instanceof PDFDict) return obj;
+    if (!obj) return null;
+    const looked = context.lookup(obj);
+    return looked instanceof PDFDict ? looked : null;
+  };
+
   // ---- 1. Find XObjects actually referenced in content streams ------------
   const usedXObjects = new Set();
   const streamsToScan = [];
@@ -212,7 +223,7 @@ export async function pruneUnusedResources(pdfDoc) {
   for (const page of pages) {
     const res = page.node.Resources();
     if (!res) continue;
-    const xobjDict = res.get(PDFName.of('XObject'));
+    const xobjDict = asDict(res.get(PDFName.of('XObject')));
     if (!xobjDict) continue;
     for (const [name, ref] of [...xobjDict.entries()]) {
       xobjByName[name.toString()] = ref;
@@ -239,9 +250,10 @@ export async function pruneUnusedResources(pdfDoc) {
           streamsToScan.push(xobj);
           // Check XObject's own Resources for nested XObjects
           const nestedRes = xobj.dict?.get?.(PDFName.of('Resources'));
-          if (nestedRes instanceof PDFDict) {
-            const nestedXObj = nestedRes.get(PDFName.of('XObject'));
-            if (nestedXObj instanceof PDFDict) {
+          const nestedResDict = asDict(nestedRes);
+          if (nestedResDict) {
+            const nestedXObj = asDict(nestedResDict.get(PDFName.of('XObject')));
+            if (nestedXObj) {
               for (const [, nref] of [...nestedXObj.entries()]) {
                 const nobj = context.lookup(nref);
                 if (nobj) streamsToScan.push(nobj);
@@ -271,7 +283,7 @@ export async function pruneUnusedResources(pdfDoc) {
   for (const page of pages) {
     const res = page.node.Resources();
     if (!res) continue;
-    const xobjDict = res.get(PDFName.of('XObject'));
+    const xobjDict = asDict(res.get(PDFName.of('XObject')));
     if (!xobjDict) continue;
 
     for (const [name, ref] of [...xobjDict.entries()]) {
