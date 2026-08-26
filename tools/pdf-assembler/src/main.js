@@ -325,12 +325,24 @@ async function assemblePDF() {
     // Create new PDF document
     const masterPdf = await PDFDocument.create();
 
-    // Add each PDF the specified number of times
+    // Embed each source's pages as Form XObjects once, then draw them onto
+    // fresh pages per replica. Re-copying pages per replica (or reusing the
+    // same page object) either duplicates shared resources or produces a
+    // malformed page tree that strict readers (Acrobat) reject.
     for (const pdf of uploadedPDFs) {
+      if (pdf.replicas <= 0) continue;
+
+      const pageXObjects = await masterPdf.embedPdf(
+        pdf.pdfDoc,
+        pdf.pdfDoc.getPageIndices()
+      );
+
       for (let i = 0; i < pdf.replicas; i++) {
-        // Copy all pages from this PDF
-        const pages = await masterPdf.copyPages(pdf.pdfDoc, pdf.pdfDoc.getPageIndices());
-        pages.forEach(page => masterPdf.addPage(page));
+        for (const xObject of pageXObjects) {
+          const { width, height } = xObject.size();
+          const page = masterPdf.addPage([width, height]);
+          page.drawPage(xObject);
+        }
       }
     }
 
