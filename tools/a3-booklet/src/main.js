@@ -1,0 +1,338 @@
+/**
+ * A4 → A3 Booklet — main application logic.
+ *
+ * Upload any number of A4 PDFs (or a ZIP of them, one instrument per file).
+ * Each file is imposed independently onto A3 landscape sheets so that
+ * after duplex printing (short-edge flip) and folding, the pages read in
+ * order.
+ *
+ * Two imposition modes, toggled PER FILE (per instrument):
+ *  - Saddle-stitch (default): sheet 1 front = [last, 1], back = [2, ...].
+ *    All sheets are nested, folded once, and stapled through the spine.
+ *  - Sequential: sheet 1 front = [1, 2], back = [3, 4], etc. Each sheet is
+ *    folded separately and the folded sheets are stacked.
+ *
+ * JSZip is loaded at runtime from the CDN (repo convention).
+ */
+
+import {
+  loadPDF,
+  renderPageThumbnail,
+  computeLayout,
+  generateA3BookletPDF,
+} from './pdf-processor.js';
+import { t } from '../../../i18n.js';
+
+// ---- state ---------------------------------------------------------------
+let items = []; // { file, name, pdfDoc (PDF.js), numPages, sequential, thumbs[], layout }
+
+// ---- DOM -----------------------------------------------------------------
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const processing = document.getElementById('processing');
+const processingLabel = document.getElementById('processingLabel');
+const previewSection = document.getElementById('previewSection');
+const filesList = document.getElementById('filesList');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+const downloadZipBtn = document.getElementById('downloadZipBtn');
+const errorMessage = document.getElementById('errorMessage');
+const fileInfo = document.getElementById('fileInfo');
+
+// Events
+uploadArea.addEventListener('click', () => fileInput.click());
+uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
+uploadArea.addEventListener('drop', handleDrop);
+fileInput.addEventListener('change', handleFileSelect);
+downloadAllBtn.addEventListener('click', downloadAll);
+downloadZipBtn.addEventListener('click', downloadAllAsZip);
+
+// ---- file handling -------------------------------------------------------
+async function handleDrop(e) {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  const files = Array.from(e.dataTransfer.files);
+  await processFiles(files);
+}
+
+async function handleFileSelect(e) {
+  await processFiles(Array.from(e.target.files));
+}
+
+async function processFiles(files) {
+  try {
+    hideError();
+    previewSection.classList.remove('active');
+    processing.classList.add('active');
+    processingLabel.textContent = t('a3booklet.processing');
+
+    items = [];
+
+    const pdfFiles = [];
+    for (const file of files) {
+      if (file.name.toLowerCase().endsWith('.zip')) {
+        for (const pdfFile of await extractPDFsFromZip(file)) pdfFiles.push(pdfFile);
+      } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        pdfFiles.push(file);
+      }
+    }
+
+    if (pdfFiles.length === 0) throw new Error(t('a3booklet.error.nofiles'));
+
+    // Load + thumbnail + layout for each file (sequential keeps memory sane).
+    for (let i = 0; i < pdfFiles.length; i++) {
+      const file = pdfFiles[i];
+      processingLabel.textContent = `${t('a3booklet.processing')} (${i + 1}/${pdfFiles.length})`;
+
+      const pdfDoc = await loadPDF(file);
+      const thumbs = [];
+      for (let p = 1; p <= pdfDoc.numPages; p++) {
+        const page = await pdfDoc.getPage(p);
+        // 400px wide so the 2.4x hover zoom stays sharp; CSS constrains
+        // the slot to its A4 aspect either way.
+        const canvas = await renderPageThumbnail(page, 400);
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.objectFit = 'contain';
+        thumbs.push(canvas);
+      }
+
+      const item = {
+        file,
+        name: file.name,
+        pdfDoc,
+        numPages: pdfDoc.numPages,
+        sequential: false,
+        thumbs,
+        layout: null,
+      };
+      rebuildItemLayout(item);
+      items.push(item);
+    }
+
+    fileInfo.style.display = 'block';
+    fileInfo.innerHTML = `<strong>✓ ${items.length} ${t('a3booklet.files')}</strong>`;
+
+    renderPreview();
+
+    processing.classList.remove('active');
+    previewSection.classList.add('active');
+  } catch (err) {
+    console.error(err);
+    processing.classList.remove('active');
+    showError(t('a3booklet.error.load') + ': ' + err.message);
+  }
+}
+
+/** Extract PDF files from a ZIP (JSZip from CDN, per repo convention). */
+async function extractPDFsFromZip(zipFile) {
+  const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm')).default;
+  const zip = await JSZip.loadAsync(zipFile);
+  const pdfFiles = [];
+  for (const [filename, entry] of Object.entries(zip.files)) {
+    if (!entry.dir && filename.toLowerCase().endsWith('.pdf')) {
+      const blob = await entry.async('blob');
+      pdfFiles.push(new File([blob], filename, { type: 'application/pdf' }));
+    }
+  }
+  return pdfFiles;
+}
+
+/** Recompute one item's imposition (e.g. after toggling its mode). */
+function rebuildItemLayout(item) {
+  item.layout = computeLayout(item.numPages, item.sequential);
+}
+
+// ---- preview UI ----------------------------------------------------------
+function renderPreview() {
+  filesList.innerHTML = '';
+
+  items.forEach((item, idx) => {
+    const block = document.createElement('div');
+    block.className = 'file-block';
+
+    // Header: name, per-file mode toggle
+    const header = document.createElement('div');
+    header.className = 'file-header';
+
+    const name = document.createElement('div');
+    name.className = 'file-name';
+    name.textContent = `${idx + 1}. ${item.name} — ${item.numPages} ${t('a3booklet.pages')}, ${item.layout.sheets.length} × A3`;
+    header.appendChild(name);
+
+    const toggleLabel = document.createElement('label');
+    toggleLabel.className = 'mode-toggle';
+    const toggle = document.createElement('input');
+    toggle.type = 'checkbox';
+    toggle.checked = item.sequential;
+    toggle.addEventListener('change', () => {
+      item.sequential = toggle.checked;
+      rebuildItemLayout(item);
+      renderPreview();
+    });
+    toggleLabel.appendChild(toggle);
+    const toggleText = document.createElement('span');
+    toggleText.textContent = t('a3booklet.sequential');
+    toggleLabel.appendChild(toggleText);
+    header.appendChild(toggleLabel);
+
+    block.appendChild(header);
+
+    // Padding notice (odd page counts etc.)
+    const blankCount = item.layout.sheets.reduce(
+      (acc, s) => acc + [...s.front, ...s.back].filter((p) => p === 0).length, 0);
+    if (blankCount > 0) {
+      const notice = document.createElement('div');
+      notice.className = 'padding-notice active';
+      const key = item.sequential ? 'a3booklet.notice.sequential' : 'a3booklet.notice.saddle';
+      notice.textContent = t(key)
+        .replace('{pages}', item.numPages)
+        .replace('{blanks}', blankCount);
+      block.appendChild(notice);
+    }
+
+    // Sheet cards
+    const grid = document.createElement('div');
+    grid.className = 'sheets-grid';
+
+    item.layout.sheets.forEach((sheet, s) => {
+      const card = document.createElement('div');
+      card.className = 'sheet-card';
+
+      const num = document.createElement('div');
+      num.className = 'sheet-num';
+      num.textContent = `${t('a3booklet.sheet')} ${s + 1}`;
+      card.appendChild(num);
+
+      for (const [sideKey, slots] of [['front', sheet.front], ['back', sheet.back]]) {
+        const row = document.createElement('div');
+        row.className = 'side-row';
+
+        const label = document.createElement('div');
+        label.className = 'side-label';
+        label.textContent = sideKey === 'front' ? t('a3booklet.front') : t('a3booklet.back');
+        row.appendChild(label);
+
+        const sideThumbs = document.createElement('div');
+        sideThumbs.className = 'side-thumbnails';
+
+        slots.forEach((logical) => {
+          const slot = document.createElement('div');
+          slot.className = 'slot' + (logical === 0 ? ' blank-slot' : '');
+
+          if (logical !== 0 && item.thumbs[logical - 1]) {
+            const clone = document.createElement('canvas');
+            const src = item.thumbs[logical - 1];
+            clone.width = src.width;
+            clone.height = src.height;
+            clone.getContext('2d').drawImage(src, 0, 0);
+            slot.appendChild(clone);
+          }
+
+          const badge = document.createElement('div');
+          badge.className = 'page-badge';
+          badge.textContent = logical === 0 ? t('a3booklet.blank') : String(logical);
+          slot.appendChild(badge);
+
+          // Smart zoom origin: when magnified, keep the slot on screen —
+          // slots at the left/right edge of the viewport zoom inward instead
+          // of extending past it (same approach as the combiner).
+          slot.addEventListener('mouseenter', () => {
+            const rect = slot.getBoundingClientRect();
+            const scale = 2.4;
+            const grownW = rect.width * scale;
+            const leftEdge = rect.left - (grownW - rect.width) / 2;
+            const rightEdge = rect.right + (grownW - rect.width) / 2;
+
+            if (leftEdge < 0) {
+              slot.style.transformOrigin = 'left center';
+            } else if (rightEdge > window.innerWidth) {
+              slot.style.transformOrigin = 'right center';
+            } else {
+              slot.style.transformOrigin = 'center center';
+            }
+          });
+
+          sideThumbs.appendChild(slot);
+        });
+
+        row.appendChild(sideThumbs);
+        card.appendChild(row);
+      }
+
+      grid.appendChild(card);
+    });
+
+    block.appendChild(grid);
+    filesList.appendChild(block);
+  });
+}
+
+// ---- export --------------------------------------------------------------
+function outputName(item) {
+  const base = item.name.replace(/\.[^./]+$/, '');
+  return `${base}-A3.pdf`;
+}
+
+async function downloadAll() {
+  try {
+    hideError();
+    for (let i = 0; i < items.length; i++) {
+      processing.classList.add('active');
+      processingLabel.textContent = `${t('a3booklet.exporting')} (${i + 1}/${items.length})`;
+      const blob = await generateA3BookletPDF(items[i].file, items[i].layout.sheets);
+      downloadFile(blob, outputName(items[i]));
+      await new Promise((r) => setTimeout(r, 100)); // let the browser start each download
+    }
+    processing.classList.remove('active');
+  } catch (err) {
+    console.error(err);
+    processing.classList.remove('active');
+    showError(t('a3booklet.error.export') + ': ' + err.message);
+  }
+}
+
+async function downloadAllAsZip() {
+  try {
+    hideError();
+    processing.classList.add('active');
+    processingLabel.textContent = t('a3booklet.exporting');
+
+    const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm')).default;
+    const zip = new JSZip();
+
+    for (let i = 0; i < items.length; i++) {
+      processingLabel.textContent = `${t('a3booklet.exporting')} (${i + 1}/${items.length})`;
+      const blob = await generateA3BookletPDF(items[i].file, items[i].layout.sheets);
+      zip.file(outputName(items[i]), blob);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    downloadFile(zipBlob, 'a3-booklets.zip');
+    processing.classList.remove('active');
+  } catch (err) {
+    console.error(err);
+    processing.classList.remove('active');
+    showError(t('a3booklet.error.export') + ': ' + err.message);
+  }
+}
+
+function downloadFile(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ---- helpers -------------------------------------------------------------
+function showError(msg) {
+  errorMessage.textContent = msg;
+  errorMessage.classList.add('active');
+}
+function hideError() {
+  errorMessage.classList.remove('active');
+}

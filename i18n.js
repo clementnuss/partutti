@@ -21,6 +21,10 @@ const translations = {
     'tool.booklet.name': 'PDF Booklet → A4',
     'tool.booklet.desc': 'Split scanned A3 booklets into A4 pages and reorder them into reading order.',
 
+    'tool.a3booklet.name': 'A4 → A3 Booklet',
+    'tool.a3booklet.desc': 'Impose A4 PDFs onto A3 sheets in saddle-stitch or sequential order for booklet printing. Multiple files at once.',
+    'tool.a3booklet.title': 'A4 → A3 Booklet - Partutti',
+
     // Common
     'common.back': 'Back to Home',
     'common.download': 'Download',
@@ -104,6 +108,28 @@ const translations = {
     'booklet.error.export': 'Failed to export PDF',
     'booklet.reuseFilename': 'Reuse original filename',
 
+    // A3 Booklet (imposition)
+    'a3booklet.upload.title': 'Drop A4 PDF files or ZIP here',
+    'a3booklet.upload.subtitle': 'One instrument per file. Pages are rearranged onto A3 sheets. Print duplex (flip on short edge), then fold and staple.',
+    'a3booklet.upload.browse': 'or click to browse',
+    'a3booklet.sequential': 'Sequential order (pages 1+2 on the front of each sheet, 3+4 on the back) instead of saddle-stitch',
+    'a3booklet.processing': 'Processing PDF...',
+    'a3booklet.exporting': 'Exporting A3 booklet PDF...',
+    'a3booklet.preview.title': 'Imposed sheets',
+    'a3booklet.download.all': 'Download All',
+    'a3booklet.download.zip': 'Download as ZIP',
+    'a3booklet.blank': 'blank',
+    'a3booklet.front': 'Front',
+    'a3booklet.back': 'Back',
+    'a3booklet.sheet': 'Sheet',
+    'a3booklet.pages': 'pages',
+    'a3booklet.files': 'files',
+    'a3booklet.notice.saddle': '⚠ {pages} pages: the saddle-stitch layout needs a multiple of 4, so {blanks} blank page(s) were added around page 1 / at the end. Reading order stays correct.',
+    'a3booklet.notice.sequential': '⚠ {pages} pages: the last sheet\'s remaining half(ves) will print blank ({blanks} blank slot(s)). Reading order stays correct.',
+    'a3booklet.error.load': 'Failed to load PDF',
+    'a3booklet.error.export': 'Failed to export PDF',
+    'a3booklet.error.nofiles': 'No PDF files found',
+
     // Footer
     'footer.star': 'Star on GitHub',
     'footer.bug': 'Report Bug / Request Feature',
@@ -126,6 +152,9 @@ const translations = {
 
     'tool.booklet.name': 'PDF-Heft → A4',
     'tool.booklet.desc': 'Zerlegt gescannte A3-Hefte in A4-Seiten und sortiert sie in die Lesereihenfolge.',
+
+    'tool.a3booklet.name': 'A4 → A3-Heft',
+    'tool.a3booklet.desc': 'Setzt A4-PDFs im Heftbindungs- oder fortlaufenden Layout auf A3-Blätter für den Heftdruck. Mehrere Dateien gleichzeitig.',
 
     // Common
     'common.back': 'Zurück zur Startseite',
@@ -210,6 +239,28 @@ const translations = {
     'booklet.error.export': 'PDF konnte nicht exportiert werden',
     'booklet.reuseFilename': 'Originalen Dateinamen verwenden',
 
+    // A3 Booklet (imposition)
+    'a3booklet.upload.title': 'A4-PDF-Dateien oder ZIP hier ablegen',
+    'a3booklet.upload.subtitle': 'Ein Instrument pro Datei. Seiten werden auf A3-Blätter umgeordnet. Duplex drucken (Kurzkante), dann falten und heften.',
+    'a3booklet.upload.browse': 'oder klicken Sie zum Durchsuchen',
+    'a3booklet.sequential': 'Fortlaufende Reihenfolge (Seiten 1+2 auf der Vorderseite jedes Blattes, 3+4 auf der Rückseite) statt Heftbindung',
+    'a3booklet.processing': 'PDF wird verarbeitet...',
+    'a3booklet.exporting': 'A3-PDF wird exportiert...',
+    'a3booklet.preview.title': 'Zusammengesetzte Blätter',
+    'a3booklet.download.all': 'Alle herunterladen',
+    'a3booklet.download.zip': 'Als ZIP herunterladen',
+    'a3booklet.blank': 'leer',
+    'a3booklet.front': 'Vorderseite',
+    'a3booklet.back': 'Rückseite',
+    'a3booklet.sheet': 'Blatt',
+    'a3booklet.pages': 'Seiten',
+    'a3booklet.files': 'Dateien',
+    'a3booklet.notice.saddle': '⚠ {pages} Seiten: Das Heftbindungslayout erfordert ein Vielfaches von 4, daher wurde(n) {blanks} leere Seite(n) um Seite 1 / am Ende ergänzt. Die Lesereihenfolge bleibt korrekt.',
+    'a3booklet.notice.sequential': '⚠ {pages} Seiten: Die übrige(n) Hälfte(n) des letzten Blattes werden leer gedruckt ({blanks} leere(r) Platz/Plätze). Die Lesereihenfolge bleibt korrekt.',
+    'a3booklet.error.load': 'PDF konnte nicht geladen werden',
+    'a3booklet.error.export': 'PDF konnte nicht exportiert werden',
+    'a3booklet.error.nofiles': 'Keine PDF-Dateien gefunden',
+
     // Footer
     'footer.star': 'Mit Stern auf GitHub markieren',
     'footer.bug': 'Fehler melden / Funktion anfordern',
@@ -232,6 +283,9 @@ const translations = {
 
     'tool.booklet.name': 'PDF Livret → A4',
     'tool.booklet.desc': 'Découpe les livrets A3 scannés en pages A4 et les remet dans l\'ordre de lecture.',
+
+    'tool.a3booklet.name': 'A4 → Livret A3',
+    'tool.a3booklet.desc': 'Impose des PDF A4 sur des feuilles A3 en ordre d\'agrafrage ou séquentiel pour l\'impression en livret. Plusieurs fichiers à la fois.',
 
     // Common
     'common.back': 'Retour à l\'accueil',
@@ -315,6 +369,28 @@ const translations = {
     'booklet.error.load': 'Échec du chargement du PDF',
     'booklet.error.export': 'Échec de l\'export du PDF',
     'booklet.reuseFilename': 'Réutiliser le nom de fichier d\'origine',
+
+    // A3 Booklet (imposition)
+    'a3booklet.upload.title': 'Déposez des PDF A4 ou un ZIP ici',
+    'a3booklet.upload.subtitle': 'Un instrument par fichier. Les pages sont réarrangées sur des feuilles A3. Imprimez en recto-verso (retour sur petit côté), puis pliez et agrafez.',
+    'a3booklet.upload.browse': 'ou cliquez pour parcourir',
+    'a3booklet.sequential': 'Ordre séquentiel (pages 1+2 au recto de chaque feuille, 3+4 au verso) au lieu de l\'agrafrage centré',
+    'a3booklet.processing': 'Traitement du PDF...',
+    'a3booklet.exporting': 'Export du PDF A3...',
+    'a3booklet.preview.title': 'Feuilles imposées',
+    'a3booklet.download.all': 'Tout télécharger',
+    'a3booklet.download.zip': 'Télécharger en ZIP',
+    'a3booklet.blank': 'vide',
+    'a3booklet.front': 'Recto',
+    'a3booklet.back': 'Verso',
+    'a3booklet.sheet': 'Feuille',
+    'a3booklet.pages': 'pages',
+    'a3booklet.files': 'fichiers',
+    'a3booklet.notice.saddle': '⚠ {pages} pages : la mise en page agrafée nécessite un multiple de 4, donc {blanks} page(s) blanche(s) ont été ajoutées autour de la page 1 / à la fin. L\'ordre de lecture reste correct.',
+    'a3booklet.notice.sequential': '⚠ {pages} pages : la ou les moitiés restantes de la dernière feuille sortiront blanches ({blanks} emplacement(s) vide(s)). L\'ordre de lecture reste correct.',
+    'a3booklet.error.load': 'Échec du chargement du PDF',
+    'a3booklet.error.export': 'Échec de l\'export du PDF',
+    'a3booklet.error.nofiles': 'Aucun fichier PDF trouvé',
 
     // Footer
     'footer.star': 'Ajouter une étoile sur GitHub',

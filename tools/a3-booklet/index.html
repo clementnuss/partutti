@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" data-i18n-title="tool.a3booklet.title">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A4 → A3 Booklet - Partutti</title>
+  <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: #666;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .back-button:hover { background: #555; }
+
+    h1 { color: #333; margin-bottom: 0.5rem; }
+    .subtitle { color: #666; font-size: 0.9rem; }
+
+    .upload-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .upload-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 3rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-area:hover { border-color: #4CAF50; background: #f9f9f9; }
+    .upload-area.dragover { border-color: #4CAF50; background: #e8f5e9; }
+    input[type="file"] { display: none; }
+    .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    .file-info {
+      background: #f5f5f5;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-top: 1rem;
+      display: none;
+    }
+    .file-info strong { color: #4CAF50; }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+    button:hover { background: #45a049; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+
+    .btn-small {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .processing {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      display: none;
+    }
+    .processing.active { display: block; }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .preview-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .preview-section.active { display: block; }
+
+    .preview-toolbar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .preview-toolbar h2 { margin-right: auto; }
+
+    .files-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .file-block {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.25rem;
+      background: #fafafa;
+    }
+
+    .file-header {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .file-name {
+      font-weight: bold;
+      color: #333;
+      margin-right: auto;
+      word-break: break-all;
+    }
+
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: #555;
+      cursor: pointer;
+      user-select: none;
+    }
+    .mode-toggle input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .padding-notice {
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffe0b2;
+      padding: 0.6rem 0.9rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .padding-notice.active { display: block; }
+
+    .sheets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .sheet-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.6rem;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .sheet-num {
+      font-weight: bold;
+      font-size: 0.85rem;
+      color: #4CAF50;
+    }
+
+    .side-row {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .side-label {
+      font-size: 0.7rem;
+      color: #666;
+      width: 2.5rem;
+      flex-shrink: 0;
+    }
+
+    .side-thumbnails {
+      display: flex;
+      gap: 0.4rem;
+      flex: 1;
+    }
+    .slot {
+      flex: 1;
+      aspect-ratio: 1 / 1.414; /* A4 portrait */
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .slot.blank-slot { background: #eee; }
+    /* Hover magnifier: scale the slot up so page details (title, part name)
+       are readable without downloading. Smart transform-origin (set from JS)
+       keeps edge slots from zooming off-screen. */
+    .slot:hover {
+      transform: scale(2.4);
+      z-index: 10;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .slot canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .slot .page-badge {
+      position: absolute;
+      bottom: 0.15rem;
+      right: 0.2rem;
+      background: rgba(76, 175, 80, 0.85);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 0.05rem 0.3rem;
+      border-radius: 3px;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error.active { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="../../index.html" class="back-button" data-i18n="common.back">← Back to Home</a>
+    <h1 data-i18n="tool.a3booklet.name">A4 → A3 Booklet</h1>
+    <p class="subtitle" data-i18n="tool.a3booklet.desc">Impose A4 PDFs onto A3 landscape sheets, ready for duplex printing and folding. One file per instrument.</p>
+  </header>
+
+  <div class="upload-section">
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📖</div>
+      <p><strong data-i18n="a3booklet.upload.title">Drop A4 PDF files or ZIP here</strong> <span data-i18n="a3booklet.upload.browse">or click to browse</span></p>
+      <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;" data-i18n="a3booklet.upload.subtitle">
+        The pages are rearranged onto A3 sheets. Print duplex (flip on short edge), then fold and staple.
+      </p>
+      <input type="file" id="fileInput" accept=".pdf,.zip" multiple>
+    </div>
+    <div id="fileInfo" class="file-info"></div>
+  </div>
+
+  <div class="error" id="errorMessage"></div>
+
+  <div class="processing" id="processing">
+    <div class="spinner"></div>
+    <p id="processingLabel" data-i18n="common.processing">Processing PDF...</p>
+  </div>
+
+  <div class="preview-section" id="previewSection">
+    <div class="preview-toolbar">
+      <h2 data-i18n="a3booklet.preview.title">Imposed sheets</h2>
+      <button id="downloadAllBtn" class="btn-small" data-i18n="a3booklet.download.all">Download All</button>
+      <button id="downloadZipBtn" class="btn-small" data-i18n="a3booklet.download.zip">Download as ZIP</button>
+    </div>
+    <div class="files-list" id="filesList"></div>
+  </div>
+
+  <script type="module">
+    import { initI18n } from '../../i18n.js';
+    initI18n();
+  </script>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

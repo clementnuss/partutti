@@ -17,6 +17,7 @@ export default defineConfig({
         merger: resolve(__dirname, 'tools/pdf-merger/index.html'),
         assembler: resolve(__dirname, 'tools/pdf-assembler/index.html'),
         booklet: resolve(__dirname, 'tools/pdf-booklet/index.html'),
+        a3booklet: resolve(__dirname, 'tools/a3-booklet/index.html'),
       }
     }
   }
