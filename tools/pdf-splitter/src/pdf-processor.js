@@ -190,34 +190,47 @@ export async function getPageThumbnail(page, maxWidth = 200) {
 }
 
 /**
- * Extract text from page using OCR (fallback when no text layer exists)
+ * Extract text from page using OCR (fallback when no text layer exists).
+ * One Tesseract worker is created lazily and reused for the whole session;
+ * it is terminated on pagehide.
  */
-export async function extractTextWithOCR(page) {
-  // Dynamically import Tesseract.js
-  const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/+esm');
+let ocrWorker = null;
+let ocrWorkerPromise = null;
 
-  // Render page to canvas at higher resolution for better OCR
+async function getOCRWorker() {
+  if (ocrWorker) return ocrWorker;
+  if (!ocrWorkerPromise) {
+    ocrWorkerPromise = (async () => {
+      const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/+esm');
+      return await createWorker('eng');
+    })();
+  }
+  ocrWorker = await ocrWorkerPromise;
+  return ocrWorker;
+}
+
+window.addEventListener('pagehide', () => {
+  if (ocrWorker) {
+    ocrWorker.terminate();
+    ocrWorker = null;
+    ocrWorkerPromise = null;
+  }
+});
+
+export async function extractTextWithOCR(page) {
   const canvas = await renderPageToCanvas(page, 2.0);
 
-  // Crop to top portion only (where instrument names are)
   const viewport = page.getViewport({ scale: 2.0 });
   const cropCanvas = document.createElement('canvas');
   const cropCtx = cropCanvas.getContext('2d');
 
-  // Crop to top 15% of page
   const cropHeight = Math.floor(viewport.height * 0.15);
   cropCanvas.width = viewport.width;
   cropCanvas.height = cropHeight;
 
   cropCtx.drawImage(canvas, 0, 0);
 
-  // Initialize Tesseract worker
-  const worker = await createWorker('eng');
-
-  try {
-    const { data: { text } } = await worker.recognize(cropCanvas);
-    return text.trim();
-  } finally {
-    await worker.terminate();
-  }
+  const worker = await getOCRWorker();
+  const { data: { text } } = await worker.recognize(cropCanvas);
+  return text.trim();
 }

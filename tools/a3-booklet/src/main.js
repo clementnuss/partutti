@@ -1,18 +1,7 @@
 /**
- * A4 → A3 Booklet — main application logic.
- *
- * Upload any number of A4 PDFs (or a ZIP of them, one instrument per file).
- * Each file is imposed independently onto A3 landscape sheets so that
- * after duplex printing (short-edge flip) and folding, the pages read in
- * order.
- *
- * Two imposition modes, toggled PER FILE (per instrument):
- *  - Saddle-stitch (default): sheet 1 front = [last, 1], back = [2, ...].
- *    All sheets are nested, folded once, and stapled through the spine.
- *  - Sequential: sheet 1 front = [1, 2], back = [3, 4], etc. Each sheet is
- *    folded separately and the folded sheets are stacked.
- *
- * JSZip is loaded at runtime from the CDN (repo convention).
+ * A4 → A3 Booklet — main logic. Multiple A4 PDFs (or a ZIP of them), each
+ * imposed independently in saddle-stitch or sequential mode (per-file
+ * toggle), previewed per sheet, and exported as [name]-A3.pdf files.
  */
 
 import {
@@ -23,10 +12,8 @@ import {
 } from './pdf-processor.js';
 import { t } from '../../../i18n.js';
 
-// ---- state ---------------------------------------------------------------
-let items = []; // { file, name, pdfDoc (PDF.js), numPages, sequential, thumbs[], layout }
+let items = []; // { file, name, pdfDoc, numPages, sequential, thumbs, layout }
 
-// ---- DOM -----------------------------------------------------------------
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
 const processing = document.getElementById('processing');
@@ -38,7 +25,6 @@ const downloadZipBtn = document.getElementById('downloadZipBtn');
 const errorMessage = document.getElementById('errorMessage');
 const fileInfo = document.getElementById('fileInfo');
 
-// Events
 uploadArea.addEventListener('click', () => fileInput.click());
 uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
 uploadArea.addEventListener('dragleave', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
@@ -47,12 +33,10 @@ fileInput.addEventListener('change', handleFileSelect);
 downloadAllBtn.addEventListener('click', downloadAll);
 downloadZipBtn.addEventListener('click', downloadAllAsZip);
 
-// ---- file handling -------------------------------------------------------
 async function handleDrop(e) {
   e.preventDefault();
   uploadArea.classList.remove('dragover');
-  const files = Array.from(e.dataTransfer.files);
-  await processFiles(files);
+  await processFiles(Array.from(e.dataTransfer.files));
 }
 
 async function handleFileSelect(e) {
@@ -79,7 +63,6 @@ async function processFiles(files) {
 
     if (pdfFiles.length === 0) throw new Error(t('a3booklet.error.nofiles'));
 
-    // Load + thumbnail + layout for each file (sequential keeps memory sane).
     for (let i = 0; i < pdfFiles.length; i++) {
       const file = pdfFiles[i];
       processingLabel.textContent = `${t('a3booklet.processing')} (${i + 1}/${pdfFiles.length})`;
@@ -88,9 +71,7 @@ async function processFiles(files) {
       const thumbs = [];
       for (let p = 1; p <= pdfDoc.numPages; p++) {
         const page = await pdfDoc.getPage(p);
-        // 400px wide so the 2.4x hover zoom stays sharp; CSS constrains
-        // the slot to its A4 aspect either way.
-        const canvas = await renderPageThumbnail(page, 400);
+        const canvas = await renderPageThumbnail(page, 400); // wide enough for the 2.4x hover zoom
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         canvas.style.objectFit = 'contain';
@@ -106,7 +87,7 @@ async function processFiles(files) {
         thumbs,
         layout: null,
       };
-      rebuildItemLayout(item);
+      item.layout = computeLayout(item.numPages, item.sequential);
       items.push(item);
     }
 
@@ -124,7 +105,6 @@ async function processFiles(files) {
   }
 }
 
-/** Extract PDF files from a ZIP (JSZip from CDN, per repo convention). */
 async function extractPDFsFromZip(zipFile) {
   const JSZip = (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm')).default;
   const zip = await JSZip.loadAsync(zipFile);
@@ -138,12 +118,6 @@ async function extractPDFsFromZip(zipFile) {
   return pdfFiles;
 }
 
-/** Recompute one item's imposition (e.g. after toggling its mode). */
-function rebuildItemLayout(item) {
-  item.layout = computeLayout(item.numPages, item.sequential);
-}
-
-// ---- preview UI ----------------------------------------------------------
 function renderPreview() {
   filesList.innerHTML = '';
 
@@ -151,7 +125,6 @@ function renderPreview() {
     const block = document.createElement('div');
     block.className = 'file-block';
 
-    // Header: name, per-file mode toggle
     const header = document.createElement('div');
     header.className = 'file-header';
 
@@ -167,7 +140,7 @@ function renderPreview() {
     toggle.checked = item.sequential;
     toggle.addEventListener('change', () => {
       item.sequential = toggle.checked;
-      rebuildItemLayout(item);
+      item.layout = computeLayout(item.numPages, item.sequential);
       renderPreview();
     });
     toggleLabel.appendChild(toggle);
@@ -178,7 +151,6 @@ function renderPreview() {
 
     block.appendChild(header);
 
-    // Padding notice (odd page counts etc.)
     const blankCount = item.layout.sheets.reduce(
       (acc, s) => acc + [...s.front, ...s.back].filter((p) => p === 0).length, 0);
     if (blankCount > 0) {
@@ -191,7 +163,6 @@ function renderPreview() {
       block.appendChild(notice);
     }
 
-    // Sheet cards
     const grid = document.createElement('div');
     grid.className = 'sheets-grid';
 
@@ -234,23 +205,16 @@ function renderPreview() {
           badge.textContent = logical === 0 ? t('a3booklet.blank') : String(logical);
           slot.appendChild(badge);
 
-          // Smart zoom origin: when magnified, keep the slot on screen —
-          // slots at the left/right edge of the viewport zoom inward instead
-          // of extending past it (same approach as the combiner).
+          // Zoom inward when magnifying slots at the viewport edges.
           slot.addEventListener('mouseenter', () => {
             const rect = slot.getBoundingClientRect();
-            const scale = 2.4;
-            const grownW = rect.width * scale;
+            const grownW = rect.width * 2.4;
             const leftEdge = rect.left - (grownW - rect.width) / 2;
             const rightEdge = rect.right + (grownW - rect.width) / 2;
 
-            if (leftEdge < 0) {
-              slot.style.transformOrigin = 'left center';
-            } else if (rightEdge > window.innerWidth) {
-              slot.style.transformOrigin = 'right center';
-            } else {
-              slot.style.transformOrigin = 'center center';
-            }
+            if (leftEdge < 0) slot.style.transformOrigin = 'left center';
+            else if (rightEdge > window.innerWidth) slot.style.transformOrigin = 'right center';
+            else slot.style.transformOrigin = 'center center';
           });
 
           sideThumbs.appendChild(slot);
@@ -268,7 +232,6 @@ function renderPreview() {
   });
 }
 
-// ---- export --------------------------------------------------------------
 function outputName(item) {
   const base = item.name.replace(/\.[^./]+$/, '');
   return `${base}-A3.pdf`;
@@ -282,7 +245,7 @@ async function downloadAll() {
       processingLabel.textContent = `${t('a3booklet.exporting')} (${i + 1}/${items.length})`;
       const blob = await generateA3BookletPDF(items[i].file, items[i].layout.sheets);
       downloadFile(blob, outputName(items[i]));
-      await new Promise((r) => setTimeout(r, 100)); // let the browser start each download
+      await new Promise((r) => setTimeout(r, 100));
     }
     processing.classList.remove('active');
   } catch (err) {
@@ -328,7 +291,6 @@ function downloadFile(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
-// ---- helpers -------------------------------------------------------------
 function showError(msg) {
   errorMessage.textContent = msg;
   errorMessage.classList.add('active');
