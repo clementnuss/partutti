@@ -198,6 +198,27 @@
       gap: 1.25rem;
     }
 
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .file-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.9rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fafafa;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .file-row .file-status { margin-left: auto; color: #666; font-size: 0.85rem; }
+    .file-row.error { border-color: #c62828; background: #ffebee; }
+    .file-row.done .file-status { color: #4CAF50; font-weight: bold; }
+    .file-row.error .file-status { color: #c62828; }
+
     .half-card {
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -306,11 +327,11 @@
   <div class="upload-section">
     <div class="upload-area" id="uploadArea">
       <div class="upload-icon">📐</div>
-      <p><strong data-i18n="booklet.upload.title">Drop one A3 booklet PDF here</strong> <span data-i18n="booklet.upload.browse">or click to browse</span></p>
+      <p><strong data-i18n="booklet.upload.title">Drop A3 booklet PDF(s) here</strong> <span data-i18n="booklet.upload.browse">or click to browse</span></p>
       <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;" data-i18n="booklet.upload.subtitle">
-        One instrument per file. A3 landscape, duplex scan.
+        One instrument per file. A3 landscape, duplex scan. Drop several files to process them all at once.
       </p>
-      <input type="file" id="fileInput" accept=".pdf">
+      <input type="file" id="fileInput" accept=".pdf" multiple>
     </div>
     <div id="fileInfo" class="file-info"></div>
   </div>
@@ -332,6 +353,18 @@
       <button id="downloadBtn" data-i18n="booklet.download">Download A4 PDF</button>
     </div>
     <div class="halves-list" id="halvesList"></div>
+  </div>
+
+  <div class="editor-section" id="batchSection">
+    <div class="editor-toolbar">
+      <h2 data-i18n="booklet.batch.title">Batch files</h2>
+      <label class="saddle-stitch-toggle">
+        <input type="checkbox" id="batchSaddleStitchCheckbox" checked>
+        <span data-i18n="booklet.saddleStitch">Saddle-stitch order</span>
+      </label>
+      <button id="batchDownloadBtn" data-i18n="booklet.batch.download">Download all as ZIP</button>
+    </div>
+    <div class="file-list" id="batchFileList"></div>
   </div>
 
   <script type="module">

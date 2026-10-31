@@ -85,8 +85,8 @@ const translations = {
     'assembler.pages': 'pages',
 
     // Booklet
-    'booklet.upload.title': 'Drop one A3 booklet PDF here',
-    'booklet.upload.subtitle': 'One instrument per file. A3 landscape, duplex scan.',
+    'booklet.upload.title': 'Drop A3 booklet PDF(s) here',
+    'booklet.upload.subtitle': 'One instrument per file. A3 landscape, duplex scan. Drop several files to process them all at once.',
     'booklet.upload.browse': 'or click to browse',
     'booklet.piece.label': 'Piece name',
     'booklet.piece.placeholder': 'e.g., Apocalyptica',
@@ -107,6 +107,14 @@ const translations = {
     'booklet.error.load': 'Failed to load PDF',
     'booklet.error.export': 'Failed to export PDF',
     'booklet.reuseFilename': 'Reuse original filename',
+
+    // Booklet batch mode
+    'booklet.batch.title': 'Batch files',
+    'booklet.batch.download': 'Download all as ZIP',
+    'booklet.batch.file': 'file',
+    'booklet.batch.files': 'files',
+    'booklet.batch.working': 'processing…',
+    'booklet.batch.zipping': 'Building ZIP...',
 
     // A3 Booklet (imposition)
     'a3booklet.upload.title': 'Drop A4 PDF files or ZIP here',
@@ -216,8 +224,8 @@ const translations = {
     'assembler.pages': 'Seiten',
 
     // Booklet
-    'booklet.upload.title': 'Ein A3-Heft-PDF hier ablegen',
-    'booklet.upload.subtitle': 'Ein Instrument pro Datei. A3 Querformat, Duplex-Scan.',
+    'booklet.upload.title': 'A3-Heft-PDF(s) hier ablegen',
+    'booklet.upload.subtitle': 'Ein Instrument pro Datei. A3 Querformat, Duplex-Scan. Mehrere Dateien ablegen, um alle gleichzeitig zu verarbeiten.',
     'booklet.upload.browse': 'oder klicken zum Durchsuchen',
     'booklet.piece.label': 'Stückname',
     'booklet.piece.placeholder': 'z.B., Apocalyptica',
@@ -238,6 +246,14 @@ const translations = {
     'booklet.error.load': 'PDF konnte nicht geladen werden',
     'booklet.error.export': 'PDF konnte nicht exportiert werden',
     'booklet.reuseFilename': 'Originalen Dateinamen verwenden',
+
+    // Booklet batch mode
+    'booklet.batch.title': 'Stapelverarbeitung',
+    'booklet.batch.download': 'Alle als ZIP herunterladen',
+    'booklet.batch.file': 'Datei',
+    'booklet.batch.files': 'Dateien',
+    'booklet.batch.working': 'wird verarbeitet…',
+    'booklet.batch.zipping': 'ZIP wird erstellt...',
 
     // A3 Booklet (imposition)
     'a3booklet.upload.title': 'A4-PDF-Dateien oder ZIP hier ablegen',
@@ -347,8 +363,8 @@ const translations = {
     'assembler.pages': 'pages',
 
     // Booklet
-    'booklet.upload.title': 'Déposez un PDF livret A3 ici',
-    'booklet.upload.subtitle': 'Un instrument par fichier. A3 paysage, scan recto-verso.',
+    'booklet.upload.title': 'Déposez un ou plusieurs PDF livret A3 ici',
+    'booklet.upload.subtitle': 'Un instrument par fichier. A3 paysage, scan recto-verso. Déposez plusieurs fichiers pour les traiter tous d\'un coup.',
     'booklet.upload.browse': 'ou cliquez pour parcourir',
     'booklet.piece.label': 'Nom du morceau',
     'booklet.piece.placeholder': 'par ex., Apocalyptica',
@@ -369,6 +385,14 @@ const translations = {
     'booklet.error.load': 'Échec du chargement du PDF',
     'booklet.error.export': 'Échec de l\'export du PDF',
     'booklet.reuseFilename': 'Réutiliser le nom de fichier d\'origine',
+
+    // Booklet batch mode
+    'booklet.batch.title': 'Traitement par lots',
+    'booklet.batch.download': 'Tout télécharger en ZIP',
+    'booklet.batch.file': 'fichier',
+    'booklet.batch.files': 'fichiers',
+    'booklet.batch.working': 'en cours…',
+    'booklet.batch.zipping': 'Création du ZIP...',
 
     // A3 Booklet (imposition)
     'a3booklet.upload.title': 'Déposez des PDF A4 ou un ZIP ici',
