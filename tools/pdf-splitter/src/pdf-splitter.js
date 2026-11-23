@@ -213,9 +213,15 @@ export async function pruneUnusedResources(pdfDoc) {
   const streamsToScan = [];
 
   for (const page of pages) {
-    const csRef = page.node.get(PDFName.of('Contents'));
-    const csObj = context.lookup(csRef);
-    if (csObj) streamsToScan.push(csObj);
+    const csObj = context.lookup(page.node.get(PDFName.of('Contents')));
+    if (csObj instanceof PDFArray) {
+      for (let i = 0; i < csObj.size(); i++) {
+        const s = context.lookup(csObj.get(i));
+        if (s) streamsToScan.push(s);
+      }
+    } else if (csObj) {
+      streamsToScan.push(csObj);
+    }
   }
 
   // Build name -> ref map from page Resources XObject dict
@@ -236,8 +242,11 @@ export async function pruneUnusedResources(pdfDoc) {
     const streamObj = streamsToScan.pop();
     if (scanned.has(streamObj)) continue;
     scanned.add(streamObj);
+    if (streamObj.dict?.get?.(PDFName.of('Subtype'))?.toString() === '/Image') continue;
 
     const text = await decodeStream(streamObj);
+    // Can't see which XObjects are used: keep them all rather than blank the page.
+    if (text === null) return;
     const matches = [...text.matchAll(/\/(\w+)\s+Do/g)];
     for (const m of matches) {
       const name = '/' + m[1];
@@ -305,9 +314,9 @@ export async function pruneUnusedResources(pdfDoc) {
   }
 }
 
-/** Decode a PDF raw stream (FlateDecode) to a text string (async). */
+/** Decode a raw or FlateDecode stream to text; null if it can't be decoded. */
 async function decodeStream(obj) {
-  if (!obj || !obj.getContents) return '';
+  if (!obj || !obj.getContents) return null;
   try {
     const raw = obj.getContents();
     // Copy to a fresh buffer — pdf-lib may return a view of a detached buffer
@@ -317,7 +326,7 @@ async function decodeStream(obj) {
     const filter = obj.dict?.get?.(PDFName.of('Filter'));
     const filterStr = filter?.toString?.() ?? '';
 
-    if (filterStr.includes('FlateDecode')) {
+    if (filterStr === '/FlateDecode' || filterStr === '[ /FlateDecode ]') {
       // Use the browser's native DecompressionStream to inflate zlib (RFC 1950)
       const ds = new DecompressionStream('deflate');
       const writer = ds.writable.getWriter();
@@ -340,10 +349,10 @@ async function decodeStream(obj) {
       }
       return new TextDecoder().decode(merged);
     }
-    // No filter — raw bytes are the content
+    if (filterStr) return null;
     return new TextDecoder().decode(data);
   } catch {
-    return '';
+    return null;
   }
 }
 
